@@ -50,7 +50,7 @@ private:
                   transform_stamped.transform.rotation.z, transform_stamped.transform.rotation.w);
 
       geometry_msgs::msg::PoseStamped map_pose;
-      tf2::doTransform(odom_pose, map_pose, transform_stamped);
+      tf2::doTransform(odom_pose, map_pose, transform_stamped); // 根据transform_stamped将odom_pose从源坐标系转换到目标坐标系，存储在map_pose中
 
       // 创建发布的消息
       auto map_pose_msg = std::make_shared<geometry_msgs::msg::PoseWithCovarianceStamped>();
