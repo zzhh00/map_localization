@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/buffer.h>
 
@@ -19,6 +20,7 @@ private:
   ros::Publisher pub_;
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
+  tf2_ros::TransformBroadcaster tf_broadcaster_;
 
   void poseCallback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& msg)
   {
@@ -30,6 +32,14 @@ private:
     {
       geometry_msgs::TransformStamped transform_stamped;
       transform_stamped = tf_buffer_.lookupTransform("map", "odom_combined", ros::Time(0));
+
+      ROS_INFO_STREAM("Translation from map frame to odom_combined frame - x: " << transform_stamped.transform.translation.x
+                      << " y: " << transform_stamped.transform.translation.y
+                      << " z: " << transform_stamped.transform.translation.z);
+      ROS_INFO_STREAM("Orientation - x: " << transform_stamped.transform.rotation.x
+                      << " y: " << transform_stamped.transform.rotation.y
+                      << " z: " << transform_stamped.transform.rotation.z
+                      << " w: " << transform_stamped.transform.rotation.w);
 
       geometry_msgs::PoseStamped map_pose;
       tf2::doTransform(odom_pose, map_pose, transform_stamped);
@@ -48,7 +58,24 @@ private:
       ROS_INFO_STREAM("Orientation - x: " << map_pose.pose.orientation.x
                       << " y: " << map_pose.pose.orientation.y
                       << " z: " << map_pose.pose.orientation.z
-                      << " w: " << map_pose.pose.orientation.w);
+                      << " w: " << map_pose.pose.orientation.w
+                      << "\n");
+
+      if(1)
+      {
+        geometry_msgs::TransformStamped tmp_transform_stamped;
+        tmp_transform_stamped.header = map_pose_msg.header;
+        tmp_transform_stamped.child_frame_id = "new_odom_combined_pose";
+        tmp_transform_stamped.transform.translation.x = map_pose_msg.pose.pose.position.x;
+        tmp_transform_stamped.transform.translation.y = map_pose_msg.pose.pose.position.y;
+        tmp_transform_stamped.transform.translation.z = map_pose_msg.pose.pose.position.z;
+        tmp_transform_stamped.transform.rotation.x = map_pose_msg.pose.pose.orientation.x;
+        tmp_transform_stamped.transform.rotation.y = map_pose_msg.pose.pose.orientation.y;
+        tmp_transform_stamped.transform.rotation.z = map_pose_msg.pose.pose.orientation.z;
+        tmp_transform_stamped.transform.rotation.w = map_pose_msg.pose.pose.orientation.w;
+
+        tf_broadcaster_.sendTransform(tmp_transform_stamped);
+      }
     }
     catch (tf2::TransformException& ex)
     {

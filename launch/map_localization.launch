@@ -1,0 +1,13 @@
+<launch>
+  <!-- 启动节点 -->
+  <node name="map_localization" pkg="map_localization" type="map_localization" output="screen" />
+
+  <!-- 设置参数 -->
+  <!-- <rosparam command="load" file="$(find package1)/config/params.yaml" /> -->
+
+
+  <!-- 启动RViz可视化工具 -->
+  <!-- <include file="$(find rviz)/launch/rviz.launch">
+    <arg name="config" value="$(find map_localization)/config/rviz_config.rviz" />
+  </include> -->
+</launch>
